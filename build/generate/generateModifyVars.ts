@@ -33,5 +33,6 @@ export function generateModifyVars(dark = false) {
         'border-radius-base': '2px', //  Component/float fillet
         'link-color': primary, //   Link color
         'app-content-background': '#fafafa', //   Link color
+        '@ant-prefix': 'lab-community',
     };
 }

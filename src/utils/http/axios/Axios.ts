@@ -4,10 +4,9 @@ import type { CreateAxiosOptions } from './axiosTransform';
 import axios from 'axios';
 import qs from 'qs';
 import { AxiosCanceler } from './axiosCancel';
-import { isFunction } from '@/utils/is';
+import { isFunction, isNull, isUnDef } from '@/utils/is';
 import { cloneDeep } from 'lodash-es';
-import { ContentTypeEnum } from '@/enums/httpEnum';
-import { RequestEnum } from '@/enums/httpEnum';
+import { ContentTypeEnum, RequestEnum } from '@/enums/httpEnum';
 
 export * from './axiosTransform';
 
@@ -61,7 +60,7 @@ export class VAxios {
     }
 
     /**
-     * @description: Interceptor configuration 拦截器配置
+     * @description: Interceptor configuration
      */
     private setupInterceptors() {
         const transform = this.getTransform();
@@ -80,8 +79,11 @@ export class VAxios {
         // Request interceptor configuration processing
         this.axiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
             // If cancel repeat request is turned on, then cancel repeat request is prohibited
-            // @ts-ignore
-            const { ignoreCancelToken } = config.requestOptions;
+            const {
+                // @ts-ignore
+                headers: { ignoreCancelToken },
+            } = config;
+
             const ignoreCancel =
                 ignoreCancelToken !== undefined
                     ? ignoreCancelToken
@@ -111,10 +113,7 @@ export class VAxios {
         // Response result interceptor error capture
         responseInterceptorsCatch &&
             isFunction(responseInterceptorsCatch) &&
-            this.axiosInstance.interceptors.response.use(undefined, (error) => {
-                // @ts-ignore
-                return responseInterceptorsCatch(this.axiosInstance, error);
-            });
+            this.axiosInstance.interceptors.response.use(undefined, responseInterceptorsCatch);
     }
 
     /**
@@ -124,10 +123,12 @@ export class VAxios {
         const formData = new window.FormData();
         const customFilename = params.name || 'file';
 
-        if (params.filename) {
-            formData.append(customFilename, params.file, params.filename);
-        } else {
-            formData.append(customFilename, params.file);
+        if (params.file) {
+            if (params.filename) {
+                formData.append(customFilename, params.file, params.filename);
+            } else {
+                formData.append(customFilename, params.file);
+            }
         }
 
         if (params.data) {
@@ -135,25 +136,100 @@ export class VAxios {
                 const value = params.data![key];
                 if (Array.isArray(value)) {
                     value.forEach((item) => {
-                        formData.append(`${key}[]`, item);
+                        formData.append(key, item);
                     });
                     return;
                 }
 
-                formData.append(key, params.data![key]);
+                if (!isUnDef(params.data![key]) && !isNull(params.data![key])) {
+                    formData.append(key, params.data![key]);
+                }
             });
         }
 
-        return this.axiosInstance.request<T>({
-            ...config,
-            method: 'POST',
-            data: formData,
-            headers: {
-                'Content-type': ContentTypeEnum.FORM_DATA,
-                // @ts-ignore
-                ignoreCancelToken: true,
-            },
+        const transform = this.getTransform();
+        const { requestCatchHook, transformRequestHook } = transform || {};
+        const { requestOptions } = this.options;
+
+        const opt: RequestOptions = Object.assign({}, requestOptions);
+
+        return new Promise((resolve, reject) => {
+            return this.axiosInstance
+                .request<T>({
+                    method: 'POST',
+                    ...config,
+                    data: formData,
+                    headers: {
+                        'Content-type': ContentTypeEnum.FORM_DATA,
+                        // @ts-ignore
+                        ignoreCancelToken: true,
+                    },
+                })
+                .then((res) => {
+                    if (transformRequestHook && isFunction(transformRequestHook)) {
+                        try {
+                            // @ts-ignore
+                            const ret = transformRequestHook(res, opt);
+                            resolve(ret);
+                        } catch (err) {
+                            reject(err || new Error('request error!'));
+                        }
+                        return;
+                    }
+                    resolve(res as unknown as Promise<T>);
+                })
+                .catch((e: Error | AxiosError) => {
+                    if (requestCatchHook && isFunction(requestCatchHook)) {
+                        reject(requestCatchHook(e, opt));
+                        return;
+                    }
+                    if (axios.isAxiosError(e)) {
+                        // rewrite error message from axios in here
+                    }
+                    reject(e);
+                });
         });
+    }
+
+    downloadFile(config: AxiosRequestConfig) {
+        const transform = this.getTransform();
+        const { requestCatchHook } = transform || {};
+        const { requestOptions } = this.options;
+
+        const opt: RequestOptions = Object.assign({}, requestOptions);
+        return this.axiosInstance
+            .request({
+                ...config,
+                responseType: 'blob',
+            })
+            .then((res) => {
+                const data = res.data;
+                if (!data) {
+                    return;
+                }
+                let fileName = 'download';
+                if (res.headers['content-disposition']) {
+                    fileName = res.headers['content-disposition'].match(/filename=(.*)/)![1];
+                }
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.setAttribute('download', decodeURI(fileName));
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(a.href);
+                document.body.removeChild(a);
+            })
+            .catch((e: Error | AxiosError) => {
+                if (requestCatchHook && isFunction(requestCatchHook)) {
+                    return Promise.reject(requestCatchHook(e, opt));
+                }
+                if (axios.isAxiosError(e)) {
+                    // rewrite error message from axios in here
+                }
+                return Promise.reject(e);
+            });
     }
 
     // support form-data
@@ -199,7 +275,7 @@ export class VAxios {
 
         const opt: RequestOptions = Object.assign({}, requestOptions, options);
 
-        const { beforeRequestHook, requestCatchHook, transformResponseHook } = transform || {};
+        const { beforeRequestHook, requestCatchHook, transformRequestHook } = transform || {};
         if (beforeRequestHook && isFunction(beforeRequestHook)) {
             conf = beforeRequestHook(conf, opt);
         }
@@ -211,9 +287,9 @@ export class VAxios {
             this.axiosInstance
                 .request<any, AxiosResponse<Result>>(conf)
                 .then((res: AxiosResponse<Result>) => {
-                    if (transformResponseHook && isFunction(transformResponseHook)) {
+                    if (transformRequestHook && isFunction(transformRequestHook)) {
                         try {
-                            const ret = transformResponseHook(res, opt);
+                            const ret = transformRequestHook(res, opt);
                             resolve(ret);
                         } catch (err) {
                             reject(err || new Error('request error!'));
