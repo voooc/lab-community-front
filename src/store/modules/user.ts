@@ -6,15 +6,17 @@ import { store } from '@/store';
 import { LoginParams } from '@/models/user';
 import { UserInfo } from '@/models/user/user';
 import { router } from '@/router';
-import { setAuthCache } from '@/utils/auth';
+import { RouteRecordRaw } from 'vue-router';
 import { defineStore } from 'pinia';
+import { usePermissionStore } from '@/store/modules/permission';
+import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
+import { getAuthCache, setAuthCache } from '@/utils/auth';
 import { h } from 'vue';
-
-import { useI18n } from 'vue-i18n';
 interface UserState {
     userInfo: Nullable<UserInfo>;
     token?: string;
     sessionTimeout?: boolean;
+    lastUpdateTime: number;
 }
 export const useUserStore = defineStore({
     id: 'user',
@@ -25,16 +27,20 @@ export const useUserStore = defineStore({
         token: undefined,
         // 登录是否超期失效
         sessionTimeout: false,
+        lastUpdateTime: 0,
     }),
     getters: {
-        getUserInfo(): Nullable<UserInfo> {
-            return this.userInfo || null;
+        getUserInfo(): UserInfo {
+            return this.userInfo || getAuthCache<UserInfo>(USER_INFO_KEY) || {};
         },
         getToken(): string {
-            return this.token || '';
+            return this.token || getAuthCache<string>(TOKEN_KEY);
         },
         getSessionTimeout(): boolean {
             return !!this.sessionTimeout;
+        },
+        getLastUpdateTime(): number {
+            return this.lastUpdateTime;
         },
     },
     actions: {
@@ -44,6 +50,7 @@ export const useUserStore = defineStore({
         },
         setUserInfo(info: UserInfo | null) {
             this.userInfo = info;
+            this.lastUpdateTime = new Date().getTime();
             setAuthCache(USER_INFO_KEY, info);
         },
         setSessionTimeout(flag: boolean) {
@@ -73,15 +80,24 @@ export const useUserStore = defineStore({
             if (sessionTimeout) {
                 this.setSessionTimeout(false);
             } else {
-                goHome && (await router.replace(PageEnum.BASE_HOME));
+                const permissionStore = usePermissionStore();
+                if (!permissionStore.isDynamicAddedRoute) {
+                    const routes = await permissionStore.buildRoutesAction();
+                    routes.forEach((route) => {
+                        router.addRoute(route as unknown as RouteRecordRaw);
+                    });
+                    router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
+                    permissionStore.setDynamicAddedRoute(true);
+                }
             }
+            goHome && (await router.replace(PageEnum.BASE_HOME));
             return userInfo;
         },
         async getUserInfoAction(): Promise<UserInfo | null> {
             if (!this.getToken) return null;
             const userInfo = await getUserInfo();
-            this.setUserInfo(userInfo);
-            return userInfo;
+            this.setUserInfo(userInfo.user);
+            return userInfo.user;
         },
         async logout(goLogin = false) {
             if (this.getToken) {
@@ -98,11 +114,10 @@ export const useUserStore = defineStore({
         },
         confirmLoginOut() {
             const { createConfirm } = useMessage();
-            const { t } = useI18n();
             createConfirm({
                 iconType: 'warning',
-                title: () => h('span', t('sys.app.logoutTip')),
-                content: () => h('span', t('sys.app.logoutMessage')),
+                title: () => h('span', '温馨提醒'),
+                content: () => h('span', '是否退出系统'),
                 onOk: async () => {
                     await this.logout(true);
                 },

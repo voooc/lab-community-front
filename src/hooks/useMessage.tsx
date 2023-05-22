@@ -99,7 +99,6 @@ function createInfoModal(options: ModalOptionsPartial) {
 function createWarningModal(options: ModalOptionsPartial) {
     return Modal.warning(createModalOptions(options, 'warning'));
 }
-Message.config({ prefixCls: 'os-micro-message' });
 
 notification.config({
     placement: 'topRight',

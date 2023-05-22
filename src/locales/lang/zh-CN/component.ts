@@ -8,6 +8,12 @@ export default {
         normalText: '获取验证码',
         sendText: '{0}秒后重新获取',
     },
+    input: {
+        placeholder: '请输入',
+    },
+    selecters: {
+        placeholder: '请选择',
+    },
     cropper: {
         selectImage: '选择图片',
         uploadSuccess: '上传成功',

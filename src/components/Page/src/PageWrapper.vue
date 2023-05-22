@@ -1,5 +1,5 @@
 <template>
-    <div :class="getClass" ref="wrapperRef">
+    <div :class="getClass" ref="wrapperRef" class="container">
         <div class="title" v-if="title" ref="headerRef">
             <span class="text">{{ title }}</span>
         </div>
@@ -143,6 +143,7 @@
     .@{prefix-cls} {
         position: relative;
         border-radius: 0px;
+        margin: 0 auto;
 
         .title {
             display: flex;
@@ -161,9 +162,9 @@
             box-sizing: border-box;
         }
 
-        &-content {
-            padding: 20px;
-        }
+        // &-content {
+        //     min-height: calc(100vh - 104px);
+        // }
 
         &-content-bg {
             background-color: #fff;

@@ -6,6 +6,7 @@ import type { RequestOptions, Result } from '/#/axios';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './Axios';
 import { checkStatus } from './checkStatus';
+import { getToken } from '@/utils/auth';
 import { useMessage } from '@/hooks/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '@/enums/httpEnum';
 import { isString, isUrl } from '@/utils/is';
@@ -133,13 +134,15 @@ export const transform: AxiosTransform = {
     /**
      * @description: 请求拦截器处理
      */
-    requestInterceptors: (config) => {
+    requestInterceptors: (config, options) => {
         // 请求之前处理config
-        // const token = getToken();
-        // if (token) {
-        //     // 请求头携带token，用于登录校验
-        //     (config as Recordable).headers['X-Access-Token'] = token;
-        // }
+        const token = getToken();
+        if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
+            // jwt token
+            (config as Recordable).headers.Authorization = options.authenticationScheme
+                ? `${options.authenticationScheme} ${token}`
+                : token;
+        }
         return config;
     },
 
@@ -157,10 +160,9 @@ export const transform: AxiosTransform = {
         const { t } = useI18n();
         const { response, code, message, config } = error || {};
         const errorMessageMode = config?.requestOptions?.errorMessageMode || 'none';
-        const msg: string = response?.data?.error?.message ?? '';
+        const msg: string = response?.data?.message ?? '';
         const err: string = error?.toString?.() ?? '';
         let errMessage = '';
-
         try {
             if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
                 errMessage = t('sys.api.apiTimeoutMessage');
@@ -192,8 +194,8 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
             {
                 // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#authentication_schemes
                 // authentication schemes，e.g: Bearer
-                // authenticationScheme: 'Bearer',
-                authenticationScheme: '',
+                authenticationScheme: 'Bearer',
+                // authenticationScheme: '',
                 timeout: 10 * 1000,
                 // 基础接口地址
                 // baseURL: globSetting.apiUrl,

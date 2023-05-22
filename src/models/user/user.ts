@@ -1,48 +1,51 @@
-import { BasicPageParams } from '../base';
-
+import { BasicFetchResult } from '../base';
 export interface UserInfo {
-    userId: string | number;
+    id: string | number;
     // 用户名
     username: string;
+    // 真实名字
+    name: string;
     // 头像
-    avatar: string;
+    image: string;
+    // 部门
+    department: string;
     // 介绍
     desc?: string;
+    // 角色
+    roles: Array<string>;
+    // email
+    email: string;
+    follow: number;
+    fan: number;
+    user_interface?: {
+        is_follow: boolean;
+    };
 }
-
-export interface ResponseUserInfo {
-    islogin: boolean;
-    user: UserInfo;
-}
-
-export interface LdapUserVO {
-    cn: string;
-    displayName: string;
-    givenName: string;
-    mail: string;
-    samaccountName: string;
-    sn: string;
-}
-
-export type LdapUserParams = BasicPageParams & {
-    fuzzy: string;
-};
-
-export type GroupParams = BasicPageParams & {
-    fuzzy: string;
-};
-
-export interface GroupVO {
-    createBy: string;
-    createTime: string;
-    departCode: string;
-    description: string;
-    groupManager: string;
-    groupName: string;
+export interface FollowUserModel {
+    email: string;
     id: number;
-    level: number;
-    parentId: number;
-    subset: any[];
-    updateBy: string;
-    updateTime: string;
+    image: string;
+    username: string;
+    desc: string;
 }
+export interface FollowItem {
+    id: number;
+    follow: FollowUserModel;
+    fan: FollowUserModel;
+    add_time: string;
+    user_interface?: {
+        is_follow: boolean;
+    };
+}
+export type UserResultModel = BasicFetchResult<UserInfo>;
+export interface MessageItem {
+    id: number;
+    user: UserInfo;
+    to_user: UserInfo;
+    message: string;
+    url: string;
+    type: string;
+    has_read: boolean;
+    add_time: string;
+}
+export type MessageResultModel = BasicFetchResult<MessageItem>;

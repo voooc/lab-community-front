@@ -8,7 +8,7 @@
                     appear
                     v-if="route.name !== 'GraphSearch'"
                 >
-                    <!-- <keep-alive :include="['TargetList', 'PublicTargetList']"> -->
+                    <!-- <-alive :include="['TargetList', 'PublicTargetList']"> -->
                     <component :is="Component" :key="route.fullPath" />
                     <!-- </keep-alive> -->
                 </transition>

@@ -1,7 +1,10 @@
 declare module '*.vue' {
-    import { DefineComponent } from 'vue';
-    const Component: DefineComponent<{}, {}, any>;
-    export default Component;
+    // import { DefineComponent } from 'vue';
+    // const Component: DefineComponent<{}, {}, any>;
+    // export default Component;
+    import { defineComponent } from 'vue';
+    const component: ReturnType<typeof defineComponent>;
+    export default component;
 }
 
 declare module 'ant-design-vue/es/locale/*' {

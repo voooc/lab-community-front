@@ -1,6 +1,6 @@
 import { ThemeEnum } from '../enums/appEnum';
 
-export const prefixCls = 'lab-community';
+export const prefixCls = 'value-data';
 
 export const darkMode = ThemeEnum.LIGHT;
 

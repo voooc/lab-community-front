@@ -1,12 +1,7 @@
-import type { AppRouteRecordRaw } from '@/models/router';
-import {
-    LAYOUT,
-    EXCEPTION_COMPONENT,
-    PAGE_NOT_FOUND_NAME,
-    REDIRECT_NAME,
-} from '@/constants/router';
-import { PageEnum } from '@/enums/pageEnum';
+import type { AppRouteRecordRaw } from '@/router/types';
+import { REDIRECT_NAME, LAYOUT, EXCEPTION_COMPONENT, PAGE_NOT_FOUND_NAME } from '@/router/constant';
 
+// 404 on a page
 export const PAGE_NOT_FOUND_ROUTE: AppRouteRecordRaw = {
     path: '/:path(.*)*',
     name: PAGE_NOT_FOUND_NAME,
@@ -50,13 +45,4 @@ export const REDIRECT_ROUTE: AppRouteRecordRaw = {
             },
         },
     ],
-};
-
-export const RootRoute: AppRouteRecordRaw = {
-    path: '/',
-    name: 'Root',
-    redirect: PageEnum.BASE_HOME,
-    meta: {
-        title: 'Root',
-    },
 };
