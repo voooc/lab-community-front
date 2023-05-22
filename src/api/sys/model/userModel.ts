@@ -1,9 +1,12 @@
+import { FollowItem, UserInfo } from '@/models/user/user';
+
 /**
  * @description: Login interface parameters
  */
 export interface LoginParams {
-    username: string;
+    email: string;
     password: string;
+    remember: boolean;
 }
 
 export interface RoleInfo {
@@ -15,20 +18,18 @@ export interface RoleInfo {
  * @description: Login interface return value
  */
 export interface LoginResultModel {
-    userId: string | number;
     token: string;
-    role: RoleInfo;
 }
 
 /**
  * @description: Get user information return value
  */
 export interface GetUserInfoModel {
-    userId: string | number;
-    // 用户名
-    username: string;
-    // 头像
-    avatar: string;
-    // 介绍
-    desc?: string;
+    user: UserInfo;
+}
+export interface FollowResultModel {
+    count: number;
+    next: string;
+    previous: string;
+    items: Array<FollowItem>;
 }

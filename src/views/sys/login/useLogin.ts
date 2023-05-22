@@ -1,14 +1,10 @@
-import type { ValidationRule } from 'ant-design-vue/lib/form/Form';
 import type { RuleObject } from 'ant-design-vue/lib/form/interface';
 import { ref, computed, unref, Ref } from 'vue';
-import { useI18n } from '@/hooks/web/useI18n';
 
 export enum LoginStateEnum {
     LOGIN,
     REGISTER,
     RESET_PASSWORD,
-    MOBILE,
-    QR_CODE,
 }
 
 const currentState = ref(LoginStateEnum.LOGIN);
@@ -39,44 +35,44 @@ export function useFormValid<T extends Object = any>(formRef: Ref<any>) {
 }
 
 export function useFormRules(formData?: Recordable) {
-    const { t } = useI18n();
-
-    const getAccountFormRule = computed(() => createRule(t('sys.login.accountPlaceholder')));
-    const getPasswordFormRule = computed(() => createRule(t('sys.login.passwordPlaceholder')));
-    const getSmsFormRule = computed(() => createRule(t('sys.login.smsPlaceholder')));
-    const getMobileFormRule = computed(() => createRule(t('sys.login.mobilePlaceholder')));
-
-    const validatePolicy = async (_: RuleObject, value: boolean) => {
-        return !value ? Promise.reject(t('sys.login.policyPlaceholder')) : Promise.resolve();
+    const getPasswordFormRule = computed(() => createRule('请输入密码'));
+    const validateCaptcha = (email: string) => {
+        return async (_: RuleObject, value: string) => {
+            if (!email) {
+                return Promise.reject('请输入邮箱');
+            }
+            if (!value) {
+                return Promise.reject('请输入验证码');
+            }
+            return Promise.resolve();
+        };
     };
-
     const validateConfirmPassword = (password: string) => {
         return async (_: RuleObject, value: string) => {
             if (!value) {
-                return Promise.reject(t('sys.login.passwordPlaceholder'));
+                return Promise.reject('请输入密码');
             }
             if (value !== password) {
-                return Promise.reject(t('sys.login.diffPwd'));
+                return Promise.reject('两次输入密码不一致');
             }
             return Promise.resolve();
         };
     };
 
-    const getFormRules = computed((): { [k: string]: ValidationRule | ValidationRule[] } => {
-        const accountFormRule = unref(getAccountFormRule);
+    const getFormRules = computed(() => {
         const passwordFormRule = unref(getPasswordFormRule);
-        const smsFormRule = unref(getSmsFormRule);
-        const mobileFormRule = unref(getMobileFormRule);
-
-        const mobileRule = {
-            sms: smsFormRule,
-            mobile: mobileFormRule,
-        };
         switch (unref(currentState)) {
-            // register form rules
             case LoginStateEnum.REGISTER:
                 return {
-                    account: accountFormRule,
+                    email: [
+                        { required: true, message: '请输入邮箱', trigger: 'blur' },
+                        {
+                            required: true,
+                            type: 'email',
+                            message: '请输入正确的邮箱格式',
+                            trigger: 'blur',
+                        },
+                    ],
                     password: passwordFormRule,
                     confirmPassword: [
                         {
@@ -84,25 +80,43 @@ export function useFormRules(formData?: Recordable) {
                             trigger: 'change',
                         },
                     ],
-                    policy: [{ validator: validatePolicy, trigger: 'change' }],
-                    ...mobileRule,
+                    captcha: [
+                        {
+                            validator: validateCaptcha(formData?.email),
+                            trigger: 'change',
+                        },
+                    ],
                 };
-
-            // reset password form rules
             case LoginStateEnum.RESET_PASSWORD:
                 return {
-                    account: accountFormRule,
-                    ...mobileRule,
+                    email: [
+                        { required: true, message: '请输入邮箱', trigger: 'blur' },
+                        {
+                            required: true,
+                            type: 'email',
+                            message: '请输入正确的邮箱格式',
+                            trigger: 'blur',
+                        },
+                    ],
+                    captcha: [
+                        {
+                            validator: validateCaptcha(formData?.email),
+                            trigger: 'change',
+                        },
+                    ],
+                    password: passwordFormRule,
                 };
-
-            // mobile form rules
-            case LoginStateEnum.MOBILE:
-                return mobileRule;
-
-            // login form rules
             default:
                 return {
-                    account: accountFormRule,
+                    email: [
+                        { required: true, message: '请输入邮箱', trigger: 'blur' },
+                        {
+                            required: true,
+                            type: 'email',
+                            message: '请输入正确的邮箱格式',
+                            trigger: 'blur',
+                        },
+                    ],
                     password: passwordFormRule,
                 };
         }
@@ -118,4 +132,31 @@ function createRule(message: string) {
             trigger: 'change',
         },
     ];
+}
+export function queryEmail(queryString: string) {
+    const emailList = [
+        { value: '@qq.com' },
+        { value: '@163.com' },
+        { value: '@gmail.com' },
+        { value: '@foxmail.com' },
+        { value: '@sina.com' },
+        { value: '@126.com' },
+        { value: '@sohu.com' },
+        { value: '@yahoo.com.cn' },
+        { value: '@msn.com' },
+        { value: '@hotmail.com' },
+        { value: '@ask.com' },
+    ];
+    let results: { value: string }[] = [];
+    const queryList: { value: string }[] = [];
+    // 提取出所有邮箱
+    emailList.map((item) => {
+        return queryList.push({ value: queryString.split('@')[0] + item.value });
+    });
+    // 邮箱填写过滤
+    function createFilter(query) {
+        return query.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0;
+    }
+    results = queryString ? queryList.filter(createFilter) : queryList;
+    return results;
 }

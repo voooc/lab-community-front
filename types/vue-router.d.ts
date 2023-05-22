@@ -12,5 +12,6 @@ declare module 'vue-router' {
         baseRoute?: string;
         group?: string;
         subGroup?: string;
+        hideHeader?: boolean;
     }
 }

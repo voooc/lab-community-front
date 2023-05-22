@@ -146,3 +146,15 @@
         },
     });
 </script>
+<style lang="less" scoped>
+    .lazy-container-enter-active,
+    .lazy-container-leave-active {
+        transition: all 0.5s ease;
+    }
+
+    .lazy-container-enter-from,
+    .lazy-container-leave-to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+</style>

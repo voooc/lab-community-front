@@ -1,163 +1,150 @@
 <template>
-    <LoginFormTitle v-show="getShow" class="enter-x" />
-    <Form
-        class="p-4 enter-x"
+    <a-form
+        class="loginForm sign-in-form"
         :model="formData"
         :rules="getFormRules"
         ref="formRef"
-        v-show="getShow"
         @keypress.enter="handleLogin"
     >
-        <FormItem name="account" class="enter-x">
-            <Input
-                size="large"
-                v-model:value="formData.account"
-                :placeholder="t('sys.login.userName')"
-                class="fix-auto-fill"
+        <a-form-item label="邮箱" name="email">
+            <a-auto-complete
+                v-model:value="formData.email"
+                @search="onSearch"
+                :options="options"
+                placeholder="请输入邮箱"
+                allowClear
             />
-        </FormItem>
-        <FormItem name="password" class="enter-x">
-            <InputPassword
-                size="large"
-                visibilityToggle
+        </a-form-item>
+        <a-form-item label="密码" name="password">
+            <a-input-password
                 v-model:value="formData.password"
                 :placeholder="t('sys.login.password')"
-            />
-        </FormItem>
+            >
+                <template #prefix>
+                    <LockOutlined class="site-form-item-icon" />
+                </template>
+            </a-input-password>
+        </a-form-item>
 
-        <ARow class="enter-x">
+        <a-row class="enter-x">
+            <a-col :span="12">
+                <a-form-item name="remember" no-style>
+                    <a-checkbox v-model:checked="formData.remember">记住我</a-checkbox>
+                </a-form-item>
+            </a-col>
             <ACol :span="12">
-                <FormItem>
-                    <!-- No logic, you need to deal with it yourself -->
-                    <Checkbox v-model:checked="rememberMe" size="small">
-                        {{ t('sys.login.rememberMe') }}
-                    </Checkbox>
-                </FormItem>
-            </ACol>
-            <ACol :span="12">
-                <FormItem :style="{ 'text-align': 'right' }">
-                    <!-- No logic, you need to deal with it yourself -->
-                    <Button
+                <a-form-item :style="{ 'text-align': 'right' }">
+                    <a-button
                         type="link"
                         size="small"
                         @click="setLoginState(LoginStateEnum.RESET_PASSWORD)"
                     >
                         {{ t('sys.login.forgetPassword') }}
-                    </Button>
-                </FormItem>
+                    </a-button>
+                </a-form-item>
             </ACol>
-        </ARow>
+        </a-row>
 
-        <FormItem class="enter-x">
-            <Button type="primary" size="large" block @click="handleLogin" :loading="loading">
+        <a-form-item class="enter-x">
+            <a-button type="primary" size="large" block @click="handleLogin" :loading="loading">
                 {{ t('sys.login.loginButton') }}
-            </Button>
-            <!-- <Button size="large" class="mt-4 enter-x" block @click="handleRegister">
-        {{ t('sys.login.registerButton') }}
-      </Button> -->
-        </FormItem>
-        <ARow class="enter-x">
-            <ACol :md="8" :xs="24">
-                <Button block @click="setLoginState(LoginStateEnum.MOBILE)">
-                    {{ t('sys.login.mobileSignInFormTitle') }}
-                </Button>
-            </ACol>
-            <ACol :md="8" :xs="24" class="!my-2 !md:my-0 xs:mx-0 md:mx-2">
-                <Button block @click="setLoginState(LoginStateEnum.QR_CODE)">
-                    {{ t('sys.login.qrSignInFormTitle') }}
-                </Button>
-            </ACol>
-            <ACol :md="6" :xs="24">
-                <Button block @click="setLoginState(LoginStateEnum.REGISTER)">
-                    {{ t('sys.login.registerButton') }}
-                </Button>
-            </ACol>
-        </ARow>
-
-        <Divider class="enter-x">{{ t('sys.login.otherSignIn') }}</Divider>
-
-        <div class="flex justify-evenly enter-x" :class="`${prefixCls}-sign-in-way`">
-            <GithubFilled />
-            <WechatFilled />
-            <AlipayCircleFilled />
-            <GoogleCircleFilled />
-            <TwitterCircleFilled />
-        </div>
-    </Form>
+            </a-button>
+        </a-form-item>
+    </a-form>
 </template>
 <script lang="ts" setup>
-    import { reactive, ref, unref, computed } from 'vue';
-
-    import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
-    import {
-        GithubFilled,
-        WechatFilled,
-        AlipayCircleFilled,
-        GoogleCircleFilled,
-        TwitterCircleFilled,
-    } from '@ant-design/icons-vue';
-    import LoginFormTitle from './LoginFormTitle.vue';
-
+    import { reactive, ref } from 'vue';
+    import { LockOutlined } from '@ant-design/icons-vue';
     import { useI18n } from '@/hooks/web/useI18n';
-    import { useMessage } from '@/hooks/web/useMessage';
 
-    import { useUserStore } from '@/store/modules/user';
-    import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
-    import { useDesign } from '@/hooks/web/useDesign';
-    //import { onKeyStroke } from '@vueuse/core';
-
-    const ACol = Col;
-    const ARow = Row;
-    const FormItem = Form.Item;
-    const InputPassword = Input.Password;
+    import { useUserStoreWithOut } from '@/store/modules/user';
+    import {
+        LoginStateEnum,
+        useLoginState,
+        useFormRules,
+        useFormValid,
+        queryEmail,
+    } from './useLogin';
+    import { useMessage } from '@/hooks/useMessage';
     const { t } = useI18n();
-    const { notification, createErrorModal } = useMessage();
-    const { prefixCls } = useDesign('login');
-    const userStore = useUserStore();
+    const userStore = useUserStoreWithOut();
 
-    const { setLoginState, getLoginState } = useLoginState();
+    const { setLoginState } = useLoginState();
     const { getFormRules } = useFormRules();
-
     const formRef = ref();
     const loading = ref(false);
-    const rememberMe = ref(false);
-
-    const formData = reactive({
-        account: 'vben',
-        password: '123456',
+    interface FormState {
+        email: string;
+        password: string;
+        remember: boolean;
+    }
+    interface MockVal {
+        value: string;
+    }
+    const options = ref<MockVal[]>([]);
+    const onSearch = (searchText: string) => {
+        options.value = !searchText ? [] : queryEmail(searchText);
+    };
+    const formData = reactive<FormState>({
+        email: '',
+        password: '',
+        remember: true,
     });
 
     const { validForm } = useFormValid(formRef);
-
-    //onKeyStroke('Enter', handleLogin);
-
-    const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
-
+    const { createErrorModal } = useMessage();
     async function handleLogin() {
         const data = await validForm();
         if (!data) return;
         try {
             loading.value = true;
-            const userInfo = await userStore.login({
+            await userStore.login({
                 password: data.password,
-                username: data.account,
-                mode: 'none', //不要默认的错误提示
+                email: data.email,
+                remember: data.remember,
             });
-            if (userInfo) {
-                notification.success({
-                    message: t('sys.login.loginSuccessTitle'),
-                    description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.realName}`,
-                    duration: 3,
-                });
-            }
         } catch (error) {
             createErrorModal({
                 title: t('sys.api.errorTip'),
-                content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),
-                getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
+                content: (error as any).response?.data?.message || t('sys.api.networkExceptionMsg'),
+                getContainer: () => document.body,
             });
         } finally {
             loading.value = false;
         }
     }
 </script>
+<style lang="less" scoped>
+    .loginForm {
+        background-color: #fff;
+        padding: 20px 40px 20px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 5px 10px #cccc;
+        position: relative;
+        top: 200px;
+
+        .submit-btn {
+            width: 100%;
+        }
+
+        .tiparea {
+            text-align: right;
+            font-size: 12px;
+            color: #333;
+
+            p a {
+                color: #409eff;
+            }
+        }
+    }
+    /* 控制login & register显示 */
+    form {
+        padding: 0rem 5rem;
+        transition: all 0.2s 0.7s;
+        overflow: hidden;
+    }
+
+    form.sign-in-form {
+        z-index: 2;
+    }
+</style>

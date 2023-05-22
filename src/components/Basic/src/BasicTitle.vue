@@ -9,7 +9,7 @@
     import { useSlots, computed } from 'vue';
     import BasicHelp from './BasicHelp.vue';
 
-    const props = defineProps({
+    const props = {
         /**
          * Help text list or string
          * @default: ''
@@ -28,7 +28,7 @@
          * @default: false
          */
         normal: { type: Boolean },
-    });
+    };
 
     const prefixCls = 'basic-title';
     const slots = useSlots();
@@ -55,17 +55,6 @@
         &-normal {
             font-size: 14px;
             font-weight: 500;
-        }
-
-        &-show-span::before {
-            position: absolute;
-            top: 4px;
-            left: 0;
-            width: 3px;
-            height: 16px;
-            margin-right: 4px;
-            background-color: @primary-color;
-            content: '';
         }
 
         &-help {
