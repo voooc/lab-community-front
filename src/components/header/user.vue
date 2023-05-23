@@ -14,7 +14,7 @@
             </template>
         </a-dropdown-button>
         <a-dropdown placement="bottomLeft" :overlayClassName="`${prefixCls}-dropdown-overlay`">
-            <span :class="[prefixCls, `${prefixCls}--light`]" class="flex">
+            <span :class="[prefixCls, `${prefixCls}--light`]" class="flex m-10px">
                 <a-badge :count="message.total">
                     <bell-outlined :style="{ fontSize: '16px' }" />
                 </a-badge>
