@@ -10,57 +10,51 @@
             </div>
         </div>
         <div>
-            <ul class="list tag-list" v-if="data[data.selectedKeys[0]].length">
-                <template v-for="(item, index) in data[data.selectedKeys[0]]" :key="item.id">
+            <ul class="list tag-list" v-if="data[`${data.selectedKeys[0]}`].length">
+                <template v-for="(item, index) in data[`${data.selectedKeys[0]}`]" :key="item.id">
                     <li class="item">
                         <div class="user">
                             <div class="link">
                                 <router-link
                                     :to="{
                                         name: 'user-center',
-                                        params: { id: item[data.selectedKeys[0]]['id'] },
+                                        params: { id: item[`${data.selectedKeys[0]}`]['id'] },
                                     }"
                                     class="username"
-                                    ><img class="avatar" :src="item[data.selectedKeys[0]]['image']"
+                                    ><img
+                                        class="avatar"
+                                        :src="item[`${data.selectedKeys[0]}`]['image']"
                                 /></router-link>
                                 <div class="info-box">
                                     <router-link
                                         :to="{
                                             name: 'user-center',
-                                            params: { id: item[data.selectedKeys[0]]['id'] },
+                                            params: { id: item[`${data.selectedKeys[0]}`]['id'] },
                                         }"
                                         class="username"
                                         ><span class="name">{{
-                                            item[data.selectedKeys[0]]['username']
+                                            item[`${data.selectedKeys[0]}`]['username']
                                         }}</span></router-link
                                     >
                                     <div class="detail">{{
-                                        item[data.selectedKeys[0]]['desc']
+                                        item[`${data.selectedKeys[0]}`]['desc']
                                     }}</div>
                                 </div>
                                 <a-button
-                                    :class="
-                                        item[data.selectedKeys[0]]['user_interface']['is_follow']
-                                            ? 'active'
-                                            : ''
-                                    "
+                                    :class="item['user_interface']['is_follow'] ? 'active' : ''"
                                     class="follow-btn"
-                                    v-if="userInfo.id != item[data.selectedKeys[0]]['id']"
+                                    v-if="userInfo.id != item[`${data.selectedKeys[0]}`]['id']"
                                     @click="
                                         handleFollow(
-                                            item[data.selectedKeys[0]]['user_interface'][
-                                                'is_follow'
-                                            ]
+                                            item['user_interface']['is_follow']
                                                 ? 'unfollow'
                                                 : 'follow',
-                                            item[data.selectedKeys[0]]['id'],
+                                            item[`${data.selectedKeys[0]}`]['id'],
                                             index,
                                         )
                                     "
                                     >{{
-                                        item[data.selectedKeys[0]]['user_interface']['is_follow']
-                                            ? '已关注'
-                                            : '关注'
+                                        item['user_interface']['is_follow'] ? '已关注' : '关注'
                                     }}</a-button
                                 >
                             </div>
@@ -85,13 +79,14 @@
     const router = useRouter();
     const id = router.currentRoute.value.params.id;
     const loading = ref(false);
-    const page = ref(1);
     interface DataModel {
         follow: Array<FollowItem>;
         fan: Array<FollowItem>;
         selectedKeys: string[];
         fanNext: boolean;
         followNext: boolean;
+        fanPage: number;
+        followPage: number;
     }
     const data = reactive<DataModel>({
         selectedKeys: ['follow'],
@@ -99,6 +94,8 @@
         follow: [],
         fanNext: true,
         followNext: true,
+        fanPage: 0,
+        followPage: 0,
     });
     const userStore = useUserStoreWithOut();
     const userInfo = computed(() => {
@@ -123,18 +120,26 @@
     watch(
         () => params.value,
         () => {
+            data.fan = [];
+            data.follow = [];
+            data.fanNext = true;
+            data.followNext = true;
+            data.fanPage = 0;
+            data.followPage = 0;
             fetchData();
         },
+        { immediate: true },
     );
     async function fetchData() {
         if (data[`${data.selectedKeys[0]}Next`]) {
             loading.value = true;
+            data[`${data.selectedKeys[0]}Page`] += 1;
             const res: FollowResultModel = await getUserFollow({
-                page: page.value,
+                page: data[`${data.selectedKeys[0]}Page`],
                 pageSize: 20,
                 ...params.value,
             });
-            data[data.selectedKeys[0]].push(...res.items);
+            await data[`${data.selectedKeys[0]}`].push(...res.items);
             data[`${data.selectedKeys[0]}Next`] = res.next ? true : false;
             loading.value = false;
         }
@@ -159,7 +164,6 @@
             listener: scrollFn,
             wait: 100,
         });
-        fetchData();
     });
 </script>
 <style lang="less" scoped>

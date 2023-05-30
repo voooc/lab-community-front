@@ -26,13 +26,21 @@
                 </template>
             </a-input-password>
         </a-form-item>
+        <a-form-item label="确认密码" name="confirmPassword" class="enter-x">
+            <a-input-password
+                size="large"
+                visibilityToggle
+                v-model:value="formData.confirmPassword"
+                placeholder="请再次输入密码"
+            />
+        </a-form-item>
         <a-form-item>
             <a-button type="primary" size="large" block @click="handleBackLogin">
                 {{ t('common.back') }}
             </a-button>
         </a-form-item>
         <a-form-item>
-            <a-button type="primary" size="large" block @click="handleFinish" :loading="loading">
+            <a-button type="primary" size="large" block @click="handleFinish">
                 {{ t('sys.login.forgetFormTitle') }}
             </a-button>
         </a-form-item>
@@ -56,6 +64,7 @@
         email: '',
         captcha: '',
         password: '',
+        confirmPassword: '',
     });
     const { getFormRules } = useFormRules(formData);
     const { validForm } = useFormValid(formRef);

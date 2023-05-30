@@ -64,7 +64,6 @@
                     list-type="picture-card"
                     class="avatar-uploader"
                     :show-upload-list="false"
-                    action="http://127.0.0.1:8000/api/upload"
                     :before-upload="beforeUpload"
                     @change="handleUpload"
                     :customRequest="downloadFilesCustomRequest"
@@ -159,6 +158,9 @@
         const res = await formRef.value?.validateFields();
         if (!res) return;
         res.url = window.location.origin;
+        res.code_highlight = formState.code_highlight;
+        res.preview = formState.preview;
+        res.content = formState.content;
         res.avatar = res.avatar[0];
         let temp;
         if (id.value) {
@@ -213,9 +215,9 @@
         }
     };
     onMounted(async () => {
-        const res1 = (await getArticleCategory({})).items;
+        const res1 = (await getArticleCategory({ page: 1, pageSize: 10000 })).items;
         data.category = res1;
-        const res2 = (await getArticleTag({})).items;
+        const res2 = (await getArticleTag({ page: 1, pageSize: 10000 })).items;
         data.tag = res2;
     });
 </script>

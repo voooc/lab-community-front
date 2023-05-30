@@ -144,10 +144,12 @@
     });
 </script>
 <style lang="less" scoped>
+    .user-container {
+        display: flex;
+    }
+
     .main-area {
-        position: relative;
-        max-width: 100%;
-        width: 860px;
+        flex: 1 1 auto;
 
         .header {
             :deep(.ant-card) {
@@ -190,11 +192,9 @@
     }
 
     .sidebar {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        bottom: 0px;
+        flex: 0 0 auto;
         width: 18rem;
+        margin-left: 1rem;
 
         &-block {
             background-color: #fff;

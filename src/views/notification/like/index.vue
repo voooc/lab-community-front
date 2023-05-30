@@ -23,7 +23,7 @@
                                         </router-link>
                                     </template>
                                 </template>
-                                <a-skeleton avatar :title="false" :loading="!!item.loading" active>
+                                <Skeleton avatar :title="false" :loading="!!item.loading" active>
                                     <a-list-item-meta>
                                         <template #title>
                                             <router-link
@@ -124,7 +124,7 @@
                                             <Time :value="item.add_time" />
                                         </template>
                                     </a-list-item-meta>
-                                </a-skeleton>
+                                </Skeleton>
                             </a-list-item>
                         </a-badge>
                     </template>
@@ -136,22 +136,24 @@
 <script lang="ts" setup>
     import { onMounted, ref, onUnmounted } from 'vue';
     import { Time } from '@/components/Time';
+    import { Skeleton } from 'ant-design-vue';
     import { PageWrapper } from '@/components/Page';
     import { getUserSystemMessage, delectAllUserSystemMessage } from '@/api/notification/index';
     import { useEventListener } from '@/hooks/event/useEventListener';
     import { isFunction } from '@/utils/is';
     const data = ref<Array<any>>([]);
     const loading = ref(false);
-    const page = ref(1);
+    const page = ref(0);
     const next = ref(true);
     async function fetchData() {
         loading.value = true;
+        page.value += 1;
         const res = await getUserSystemMessage({
             type: 'like',
             page: page.value,
             pageSize: 20,
         });
-        data.value = res.items;
+        data.value.push(...res.items);
         const ids = [];
         data.value.forEach((item) => {
             if (!item.has_read) {

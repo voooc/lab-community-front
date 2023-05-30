@@ -9,9 +9,11 @@
         <message-skeleton-loading v-if="data.isLoading" />
         <!--新鲜事组件,sync修饰符用于子组件动态修改prop的值-->
         <message
-            v-for="item in messageList"
+            v-for="(item, index) in messageList"
             :key="item.id"
-            v-model:comment-num="item.comment"
+            :message-index="index"
+            @update:comment-num="updateCommentNum"
+            :comment-num="commentNums[index]"
             :message-info="item"
         />
     </div>
@@ -49,6 +51,10 @@
         //是否还有更多新鲜事
         hasMoreMessage: true,
     });
+    const commentNums = ref<number[]>([]);
+    function updateCommentNum(index, newCommentNum) {
+        commentNums.value[index] = newCommentNum;
+    }
     function scrollToFetchMoreMessages() {
         if (data.isLoading) return;
         let scrollHeight = document.body.scrollHeight;
@@ -80,6 +86,9 @@
         data.isLoading = false;
         data.isShowSkeleton = false;
         messageList.value = res.items;
+        commentNums.value = messageList.value.map((item) => {
+            return item.comment;
+        });
         data.hasMoreMessage = res.next ? true : false;
         data.isFirstLoading = false;
     }

@@ -84,6 +84,9 @@
     import EmotionSelect from './EmotionSelect.vue';
     import { SmileOutlined, FileImageOutlined } from '@ant-design/icons-vue';
     import clickOutside from '@/directives/clickOutside';
+    import { useUserStoreWithOut } from '@/store/modules/user';
+    import { useLoginState, LoginStateEnum } from '@/views/sys/login/useLogin';
+    import { useRouter } from 'vue-router';
     export default defineComponent({
         name: 'MessageEditBox',
         components: { MessageImageUploader, SmileOutlined, FileImageOutlined, EmotionSelect },
@@ -143,13 +146,33 @@
                 hackReset: true,
                 currentWordLength: 0,
             });
+            const userStore = useUserStoreWithOut();
+            const userInfo = computed(() => {
+                const {
+                    username = '',
+                    image,
+                    id,
+                } = userStore.getUserInfo || {
+                    username: null,
+                    image: null,
+                    id: null,
+                };
+                return { username, image, id };
+            });
             function handleCanAddImage(can: boolean) {
                 data.canAddImage = can;
             }
             function hideActionPanel() {
                 data.isShowActionPanel = false;
             }
+            const router = useRouter();
+            const { setLoginState } = useLoginState();
             function editFocus() {
+                if (!userInfo.value.id) {
+                    setLoginState(LoginStateEnum.LOGIN);
+                    router.push('/login');
+                    return;
+                }
                 data.isShowActionPanel = true;
                 data.isTextareaFocus = true;
             }

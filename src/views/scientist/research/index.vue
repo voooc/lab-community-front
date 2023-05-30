@@ -7,9 +7,9 @@
                     <div style="font-weight: normal; font-size: 36px">荣誉奖项</div>
                     <div style="font-size: 18px; color: #999999">RESEARCH FIELD</div>
                 </div>
-                <div class="content grid grid-cols-3 gap-5">
+                <div class="content grid grid-cols-3 gap-10">
                     <div v-for="item in data" :key="item.id">
-                        <a-card hoverable style="width: 300px">
+                        <a-card hoverable>
                             <template #cover>
                                 <a-image :height="200" :src="item.image" />
                             </template>
@@ -28,7 +28,7 @@
     import { AwardResultModel, AwardModel } from '@/models/about';
     const data = ref<AwardModel[]>([]);
     onMounted(async () => {
-        const res: AwardResultModel = await GetAwards({});
+        const res: AwardResultModel = await GetAwards({ page: 1, pageSize: 10000 });
         data.value = res.items;
     });
 </script>
@@ -44,6 +44,7 @@
         :deep(.ant-card) {
             .ant-image-img {
                 height: 100%;
+                object-fit: cover;
             }
         }
     }

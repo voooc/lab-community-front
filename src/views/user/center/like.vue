@@ -2,53 +2,93 @@
     <div class="concern-list-box" style="background-color: #fff">
         <div class="sub-header">
             <div class="sub-header-title">赞</div>
-            <div class="sub-type-box">文章</div>
+            <div class="sub-type-box">
+                <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal">
+                    <a-menu-item key="article">文章</a-menu-item>
+                    <a-menu-item key="discussion">动态</a-menu-item>
+                </a-menu>
+            </div>
         </div>
         <div class="entry-list list entry-list">
-            <a-skeleton :loading="loading">
-                <ul class="article__list" ref="list" v-if="data.length">
-                    <li v-for="article in data" :key="article.id" class="item h-139px">
-                        <Item :source="article" />
+            <Skeleton :loading="loading">
+                <ul
+                    class="article__list"
+                    ref="list"
+                    v-if="article.length && selectedKeys[0] === 'article'"
+                >
+                    <li v-for="temp in article" :key="temp.id" class="item h-139px">
+                        <Item :source="temp.item" />
                     </li>
                 </ul>
-                <a-empty v-else />
-            </a-skeleton>
+                <template v-if="discussion.length && selectedKeys[0] === 'discussion'">
+                    <message
+                        v-for="temp in discussion"
+                        :key="temp.id"
+                        v-model:comment-num="temp.item.comment"
+                        :message-info="temp.item"
+                    />
+                </template>
+                <a-empty v-if="!article.length && !discussion.length" />
+            </Skeleton>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
     import Item from '@/views/article/list.vue';
-    import { onMounted, ref, computed } from 'vue';
+    import Message from '@/views/discussion/components/Message.vue';
+    import { onMounted, ref, computed, watch, reactive } from 'vue';
     import { useEventListener } from '@/hooks/event/useEventListener';
     import { isFunction } from '@/utils/is';
     import { getUserLike } from '@/api/sys/user';
+    import { Skeleton } from 'ant-design-vue';
     import { useRouter } from 'vue-router';
-    import { ArticleItem } from '@/models/article';
+    import { LikeItem, LikeResultModel } from '@/models/user/user';
     const router = useRouter();
     const id = computed(() => {
         return router.currentRoute.value.params.id;
     });
     const loading = ref(false);
-    const next = ref(true);
-    const page = ref(1);
-    const data = ref<Array<ArticleItem>>([]);
+    const data = reactive({
+        discussionNext: true,
+        articleNext: true,
+        discussionPage: 0,
+        articlePage: 0,
+    });
+    const article = ref<Array<LikeItem>>([]);
+    const discussion = ref<Array<LikeItem>>([]);
+    const selectedKeys = ref<string[]>(['article']);
     async function fetchData() {
-        if (next.value) {
+        if (data[`${selectedKeys.value[0]}Next`]) {
             loading.value = true;
-            const res: any = await getUserLike({
+            data[`${selectedKeys.value[0]}Page`] += 1;
+            const res: LikeResultModel = await getUserLike({
                 user: id.value,
-                page: page.value,
+                page: data[`${selectedKeys.value[0]}Page`],
                 pageSize: 20,
-                type: 'article',
+                type: selectedKeys.value[0],
             });
-            res.items = res.items.map((temp) => {
-                return { ...temp.article, like: temp.likes.count };
-            });
-            data.value.push(...res.items);
-            next.value = res.next ? true : false;
+            if (selectedKeys.value[0] === 'article') {
+                article.value.push(...res.items);
+            } else {
+                discussion.value.push(...res.items);
+            }
+            data[`${selectedKeys.value[0]}Next`] = res.next ? true : false;
             loading.value = false;
         }
     }
+    watch(
+        () => selectedKeys.value[0],
+        () => {
+            article.value = [];
+            discussion.value = [];
+            data.discussionNext = true;
+            data.articleNext = true;
+            data.discussionPage = 0;
+            data.articlePage = 0;
+            fetchData();
+        },
+        { immediate: true },
+    );
     function scrollFn() {
         if (!fetchData || !isFunction(fetchData)) return;
         //获取网页的总高度
@@ -69,7 +109,6 @@
             listener: scrollFn,
             wait: 100,
         });
-        fetchData();
     });
 </script>
 <style lang="less" scoped>
@@ -91,6 +130,39 @@
 
         .sub-type-box {
             margin-left: auto;
+
+            .ant-menu {
+                border: none;
+
+                :deep(&:not(.ant-menu-dark)) {
+                    > .ant-menu-item {
+                        color: #72777b;
+
+                        &:not(:nth-last-child(2))::after {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            left: 67px;
+                            margin-top: -0.5em;
+                            width: 1px;
+                            height: 17px;
+                            background-color: #b2bac2;
+                            opacity: 0.5;
+                            // border-bottom: none;
+                            right: initial;
+                        }
+
+                        &:hover::after,
+                        &::after {
+                            border: none;
+                        }
+
+                        &-selected {
+                            color: #000;
+                        }
+                    }
+                }
+            }
         }
     }
 </style>

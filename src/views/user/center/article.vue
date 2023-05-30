@@ -25,11 +25,12 @@
     const id = router.currentRoute.value.params.id;
     const loading = ref(false);
     const next = ref(true);
-    const page = ref(1);
+    const page = ref(0);
     const data = ref<Array<ArticleItem>>([]);
     async function fetchData() {
         if (next.value) {
             loading.value = true;
+            page.value += 1;
             const res: ArticleResultModel = await getArticleAll({
                 user: id,
                 page: page.value,

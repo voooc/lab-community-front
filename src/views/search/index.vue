@@ -12,6 +12,7 @@
     import { ref, computed } from 'vue';
     import Article from './article/index.vue';
     import User from './user/index.vue';
+    import News from './news/index.vue';
     import { useHeaderSecondMenuStoreWithOut } from '@/store/modules/headerMenu';
     const selectedKeys = ref<string[]>(['article']);
     const menus = [
@@ -24,6 +25,11 @@
             key: 'user',
             name: '用户',
             component: User,
+        },
+        {
+            key: 'news',
+            name: '新闻',
+            component: News,
         },
     ];
     const secondMenuStore = useHeaderSecondMenuStoreWithOut();

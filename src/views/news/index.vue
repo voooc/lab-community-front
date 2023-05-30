@@ -3,7 +3,7 @@
         <div class="container">
             <div class="title"></div>
             <div class="content">
-                <a-skeleton :loading="data.loading" class="news">
+                <Skeleton :loading="data.loading" class="news">
                     <ul class="news_list" ref="list" v-if="showList.length">
                         <li v-for="article in showList" :key="article.id" class="news_item">
                             <div class="image">
@@ -47,7 +47,7 @@
                     >
                         <a-empty />
                     </div>
-                </a-skeleton>
+                </Skeleton>
             </div>
         </div>
     </div>
@@ -56,6 +56,7 @@
 <script lang="ts" setup>
     import { onMounted, ref, computed, reactive, onUnmounted } from 'vue';
     import { GetNews } from '@/api/news/index';
+    import { Skeleton } from 'ant-design-vue';
     import { FieldTimeOutlined } from '@ant-design/icons-vue';
     import { NewsItem, NewsResultModel } from '@/models/news';
     const showList = computed(() => {
@@ -67,6 +68,7 @@
         const res: NewsResultModel = await GetNews({
             page: page,
             pageSize: pageSize,
+            is_published: true,
         });
         // // 防抖处理，防止数据加载过快，骨架一闪而过影响效果
         const promise = new Promise((resolve) => {
@@ -76,7 +78,7 @@
             }, 500);
         });
         promise.then(() => {
-            data.newsInfoList = res.items;
+            data.newsInfoList.push(...res.items);
             data.next = res.next ? true : false;
         });
     };

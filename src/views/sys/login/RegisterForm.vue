@@ -62,7 +62,7 @@
                 :api="registerSms"
                 apiFieled="email"
                 :params="formData.email"
-                :placeholder="t('sys.login.smsCode')"
+                placeholder="邮箱验证码"
             />
         </a-form-item>
 

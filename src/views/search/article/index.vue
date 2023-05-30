@@ -1,7 +1,7 @@
 <template>
     <div class="result-list">
         <div class="content middle">
-            <a-skeleton :loading="data.loading">
+            <Skeleton :loading="data.loading">
                 <div class="sub-type-box">
                     <a-menu
                         v-model:selectedKeys="orderSelectedKeys"
@@ -21,12 +21,13 @@
                 <div v-else class="items-center flex justify-center h-300px">
                     <a-empty />
                 </div>
-            </a-skeleton>
+            </Skeleton>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
     import Item from '@/views/article/list.vue';
+    import { Skeleton } from 'ant-design-vue';
     import { onMounted, ref, reactive, onUnmounted, computed, watch } from 'vue';
     import { getArticleAll } from '@/api/article/index';
     import { ArticleResultModel, ArticleItem } from '@/models/article';
@@ -53,18 +54,40 @@
             }, 500);
         });
         promise.then(() => {
-            data.articleInfoList = res.items;
+            data.articleInfoList.push(...res.items);
             data.next = res.next ? true : false;
         });
     };
     const handleOrder: MenuProps['onClick'] = (menuInfo) => {
         orderSelectedKeys.value[0] = menuInfo.key as string;
-        console.log(orderSelectedKeys.value);
+        reset();
         getArticle();
     };
+    const data = reactive<DataModel>({
+        loading: true,
+        articleInfoList: [],
+        page: 1, // 当前页
+        pageSize: 20, // 每页记录数
+        itemHeight: 139, //每一列的高度
+        showNum: 10, //显示几条数据
+        start: 0, //滚动过程显示的开始索引
+        end: 10, //滚动过程显示的结束索引
+        next: true,
+    });
+    function reset() {
+        data.articleInfoList = [];
+        data.page = 1;
+        data.pageSize = 20;
+        data.itemHeight = 139;
+        data.showNum = 10;
+        data.start = 0;
+        data.end = 10;
+        data.next = true;
+    }
     watch(
         () => route.query,
         () => {
+            reset();
             getArticle();
         },
         { immediate: true },
@@ -80,17 +103,6 @@
         end: number;
         next: boolean;
     }
-    const data = reactive<DataModel>({
-        loading: true,
-        articleInfoList: [],
-        page: 1, // 当前页
-        pageSize: 20, // 每页记录数
-        itemHeight: 139, //每一列的高度
-        showNum: 10, //显示几条数据
-        start: 0, //滚动过程显示的开始索引
-        end: 10, //滚动过程显示的结束索引
-        next: true,
-    });
     function lasyLoading(e) {
         let scrollTop = e.target.scrollTop || document.body.scrollTop;
         let clientHeight = e.target.clientHeight;

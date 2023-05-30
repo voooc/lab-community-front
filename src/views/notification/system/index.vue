@@ -9,7 +9,7 @@
                                 <template #actions>
                                     <a key="list-loadmore-more" @click="handleDelete(item)">删除</a>
                                 </template>
-                                <a-skeleton avatar :title="false" :loading="!!item.loading" active>
+                                <Skeleton avatar :title="false" :loading="!!item.loading" active>
                                     <a-list-item-meta :description="item.message">
                                         <template #title>
                                             <span>系统</span>
@@ -18,7 +18,7 @@
                                             <a-avatar :src="Header" size="small" />
                                         </template>
                                     </a-list-item-meta>
-                                </a-skeleton>
+                                </Skeleton>
                             </a-list-item>
                         </a-badge>
                     </template>
@@ -31,6 +31,7 @@
     import { onMounted, onUnmounted, ref } from 'vue';
     import Header from '@/assets/images/header.jpg';
     import { PageWrapper } from '@/components/Page';
+    import { Skeleton } from 'ant-design-vue';
     import {
         getUserSystemMessage,
         delectUserSystemMessage,
@@ -44,16 +45,17 @@
         window.location.reload();
     };
     const loading = ref(false);
-    const page = ref(1);
+    const page = ref(0);
     const next = ref(true);
     async function fetchData() {
         loading.value = true;
+        page.value += 1;
         const res = await getUserSystemMessage({
             type: 'system',
             page: page.value,
             pageSize: 20,
         });
-        data.value = res.items;
+        data.value.push(...res.items);
         const ids = [];
         data.value.forEach((item) => {
             if (!item.has_read) {

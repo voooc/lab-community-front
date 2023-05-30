@@ -73,7 +73,7 @@
                                             }"
                                             class="text"
                                         >
-                                            {{ temp.title }}
+                                            <span>{{ temp.title }}</span>
                                         </router-link>
                                     </span>
                                     <span class="news_meta">
@@ -117,10 +117,22 @@
                                                 }"
                                                 class="text"
                                             >
-                                                {{ temp.title }}
+                                                <span
+                                                    style="
+                                                        white-space: nowrap;
+                                                        width: 180px;
+                                                        display: block;
+                                                        overflow: hidden;
+                                                        text-overflow: ellipsis;
+                                                    "
+                                                    >{{ temp.title }}</span
+                                                >
                                             </router-link>
                                         </span>
-                                        <span class="news_meta">
+                                        <span
+                                            class="news_meta"
+                                            style="margin-left: 20px; white-space: nowrap"
+                                        >
                                             {{ temp.add_time.split(' ')[0] }}
                                         </span>
                                     </li>
@@ -150,8 +162,12 @@
     });
     onMounted(async () => {
         const res1: BannerResultModel = await GetBanner({ page: 1, pageSize: 10 });
-        const res2: NewsResultModel = await GetNews({ page: 1, pageSize: 10 });
-        const res3: NewsResultModel = await GetAnnouncement({ page: 1, pageSize: 10 });
+        const res2: NewsResultModel = await GetNews({ page: 1, pageSize: 10, is_published: true });
+        const res3: NewsResultModel = await GetAnnouncement({
+            page: 1,
+            pageSize: 10,
+            is_published: true,
+        });
         banner.value = res1.items;
         news.value = res2.items;
         announcement.value = res3.items;

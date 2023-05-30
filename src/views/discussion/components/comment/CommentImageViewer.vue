@@ -1,13 +1,13 @@
 <!--评论中的全屏图片查看组件-->
 <template>
     <div class="comment-image-viewer-wrapper" @click="close">
-        <img :src="props.imgSrc" v-show="imgLoaded" ref="img" class="image" />
-        <a-spin :spinning="!imgLoaded" />
+        <img :src="props.imgSrc" v-if="!imgLoaded" class="image" />
+        <a-spin v-else />
     </div>
 </template>
 
 <script lang="ts" setup>
-    import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
+    import { onMounted, onUnmounted, ref, watch } from 'vue';
 
     const props = defineProps({
         imgSrc: {
@@ -15,18 +15,13 @@
             default: '',
         },
     });
-    const img = ref();
-    const imgLoaded = ref(false);
+    const imgLoaded = ref(true);
     watch(
         () => props.imgSrc,
         (newValue) => {
-            nextTick(() => {
-                if (newValue && img.value) {
-                    img.value.onload = function () {
-                        imgLoaded.value = true;
-                    };
-                }
-            });
+            if (newValue) {
+                imgLoaded.value = false;
+            }
         },
         { immediate: true },
     );

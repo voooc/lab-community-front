@@ -80,6 +80,7 @@
         const res: NewsResultModel = await GetAnnouncement({
             page: data.page,
             pageSize: data.pageSize,
+            is_published: true,
         });
         announcement.value = res.items;
         data.total = res.total;

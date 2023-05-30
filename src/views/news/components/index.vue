@@ -16,7 +16,7 @@
                     <template v-if="form.previous && form.previous.id">
                         <router-link
                             :to="{
-                                name: 'news-detail',
+                                name: props.type === 'news' ? 'news-detail' : 'announcement-detail',
                                 params: { id: form.previous.id },
                             }"
                         >
@@ -29,7 +29,7 @@
                     <template v-if="form.next && form.next.id">
                         <router-link
                             :to="{
-                                name: 'news-detail',
+                                name: props.type === 'news' ? 'news-detail' : 'announcement-detail',
                                 params: { id: form.next.id },
                             }"
                         >
@@ -52,6 +52,10 @@
         api: {
             type: Function,
             require: true,
+        },
+        type: {
+            type: String,
+            default: 'news',
         },
     });
     const form = reactive<NewsItem>({
@@ -130,14 +134,14 @@
             a {
                 display: block;
                 text-overflow: ellipsis;
-                *white-space: nowrap;
+                white-space: nowrap;
                 overflow: hidden;
                 width: 100%;
             }
 
             &:hover {
                 a {
-                    background: #912228;
+                    background: #007fff;
                     color: #fff;
                 }
             }

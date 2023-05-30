@@ -1,5 +1,5 @@
 <template>
-    <CollapseContainer title="基本设置" :canExpan="false">
+    <CollapseContainer title="基本设置" :canExpan="false" style="background: #fff">
         <a-row :gutter="24">
             <a-col :span="14">
                 <BasicForm @register="register">
@@ -27,13 +27,17 @@
                         list-type="picture-card"
                         class="avatar-uploader"
                         :show-upload-list="false"
-                        action="http://127.0.0.1:8000/api/upload"
                         :before-upload="beforeUpload"
                         @change="handleUpload"
                         :customRequest="downloadFilesCustomRequest"
                         :headers="{ 'X-Requested-With': null }"
                     >
-                        <img v-if="image" :src="image" alt="avatar" class="w-full h-full" />
+                        <img
+                            v-if="fileList[0]"
+                            :src="fileList[0]"
+                            alt="avatar"
+                            class="w-full h-full"
+                        />
                         <div v-else>
                             <loading-outlined v-if="loading" />
                             <plus-outlined v-else />
@@ -71,14 +75,15 @@
 
     const fileList = ref<Array<any>>([]);
     const loading = ref<boolean>(false);
-    const image = ref(userInfo.value.image);
+    // const image = ref(userInfo.value.image);
     const handleUpload = (info: UploadChangeParam) => {
         if (info.file.status === 'uploading') {
             loading.value = true;
             return;
         }
         if (info.file.status === 'done') {
-            image.value = info.file.response.result;
+            // @ts-ignore
+            fileList.value = [info.file.response];
             loading.value = false;
         }
         if (info.file.status === 'error') {
@@ -113,10 +118,11 @@
     };
     watch(
         () => userInfo.value.username,
-        (value: boolean) => {
+        (value) => {
             value &&
                 nextTick(() => {
                     setFieldsValue(userInfo.value);
+                    fileList.value[0] = userInfo.value.image;
                 });
         },
         { immediate: true },
@@ -125,7 +131,7 @@
     async function handleSubmit() {
         const res = {
             ...getFieldsValue(),
-            image: fileList.value[0]?.response[0] || userInfo.value.image,
+            image: fileList.value[0] || userInfo.value.image,
         };
         const temp = Object.assign(userStore.getUserInfo, res);
         userStore.setUserInfo(temp);

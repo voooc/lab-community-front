@@ -1,9 +1,9 @@
 <template>
     <div class="result-list">
         <div class="content middle">
-            <a-skeleton :loading="data.loading">
+            <Skeleton :loading="data.loading">
                 <ul class="list tag-list" ref="list" v-if="showList.length">
-                    <li v-for="(item, index) in showList" :key="item.id" class="item h-139px">
+                    <li v-for="(item, index) in showList" :key="item.id" class="item h-90px">
                         <div class="user">
                             <div class="link">
                                 <router-link
@@ -49,13 +49,14 @@
                 <div v-else class="items-center flex justify-center h-300px">
                     <a-empty />
                 </div>
-            </a-skeleton>
+            </Skeleton>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
     import { onMounted, ref, reactive, onUnmounted, computed } from 'vue';
     import { useUserStoreWithOut } from '@/store/modules/user';
+    import { Skeleton } from 'ant-design-vue';
     import { getUserAll, postUserFollow } from '@/api/sys/user';
     import { UserInfo, UserResultModel } from '@/models/user/user';
     import { useRoute } from 'vue-router';
@@ -78,7 +79,7 @@
             }, 500);
         });
         promise.then(() => {
-            data.articleInfoList = res.items;
+            data.articleInfoList.push(...res.items);
             data.next = res.next ? true : false;
         });
     };

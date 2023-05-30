@@ -80,6 +80,7 @@
             :comment-avatar="userInfo.image"
             :username="userInfo.username"
             type="discussion"
+            :messageIndex="props.messageIndex"
         />
     </div>
 </template>
@@ -90,7 +91,6 @@
     import { DiscussionModel } from '@/models/article';
     import { useUserStoreWithOut } from '@/store/modules/user';
     import { Icon } from '@/components/Icon';
-    // import mitt from '@/utils/mitt';
     import emitter from '../index';
     import Comment from './comment/index.vue';
     import { EllipsisOutlined } from '@ant-design/icons-vue';
@@ -157,7 +157,6 @@
         },
         { immediate: true },
     );
-    // const emitter = mitt();
     const { setLoginState } = useLoginState();
     const router = useRouter();
     async function toggleMessageLikes(id: string) {

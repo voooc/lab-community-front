@@ -69,7 +69,6 @@
     import { CommentItem } from '@/models/article';
     import { BasicFetchResult } from '@/models/base';
     import emitter from '../../index';
-    // import mitt from '@/utils/mitt';
     const props = defineProps({
         messageId: {
             type: String,

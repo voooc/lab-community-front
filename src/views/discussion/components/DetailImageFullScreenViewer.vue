@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
     import { Icon } from '@/components/Icon';
-    import { onMounted, onUnmounted, reactive, ref, watch, nextTick } from 'vue';
+    import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
     const props = defineProps({
         imageList: {
             type: Object as PropType<string[]>,
@@ -54,28 +54,21 @@
     });
     const img = ref();
     watch(
-        () => props.currentImageIndex,
+        () => [props.currentImageIndex, img.value],
         (newValue) => {
-            nextTick(() => {
-                if (newValue && img.value) {
-                    data.innerImageIndex = newValue;
-                    data.currentImg = img.value;
-                    if (data.currentImg) {
-                        //@ts-ignore
-                        data.currentImg.onload = function () {
-                            data.currentImageLoaded = true;
-                            //计算是不是长图
-                            //@ts-ignore
-                            let ratio =
-                                data.currentImg.naturalHeight / data.currentImg.naturalWidth;
-                            if (ratio > data.longImageRatio) {
-                                data.isCurrentImgLong = true;
-                            }
-                        };
-                        // data.currentImageLoaded = true;
+            if (newValue && img.value) {
+                data.innerImageIndex = props.currentImageIndex;
+                data.currentImg = img.value;
+                if (data.currentImg) {
+                    data.currentImageLoaded = true;
+                    //计算是不是长图
+                    //@ts-ignore
+                    let ratio = data.currentImg.naturalHeight / data.currentImg.naturalWidth;
+                    if (ratio > data.longImageRatio) {
+                        data.isCurrentImgLong = true;
                     }
                 }
-            });
+            }
         },
         { immediate: true },
     );

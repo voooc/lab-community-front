@@ -55,7 +55,11 @@
                 preview: res.preview,
             });
         } else {
+            const res = markDownRef.value.getValue();
             if (temp.info) {
+                temp.info.content = res.content;
+                temp.info.code_highlight = res.code;
+                temp.info.preview = res.preview;
                 openModal(true, temp.info);
             }
         }

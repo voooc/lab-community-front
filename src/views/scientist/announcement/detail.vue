@@ -1,5 +1,5 @@
 <template>
-    <Detail :api="GetSingleAnnouncement" />
+    <Detail :api="GetSingleAnnouncement" type="announcement" />
 </template>
 <script setup lang="ts">
     import Detail from '@/views/news/components/index.vue';

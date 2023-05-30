@@ -105,6 +105,12 @@ export function useFormRules(formData?: Recordable) {
                         },
                     ],
                     password: passwordFormRule,
+                    confirmPassword: [
+                        {
+                            validator: validateConfirmPassword(formData?.password),
+                            trigger: 'change',
+                        },
+                    ],
                 };
             default:
                 return {

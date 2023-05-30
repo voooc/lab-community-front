@@ -6,7 +6,7 @@
                     <template #renderItem="{ item, index }">
                         <a-badge :dot="!item.has_read" class="!flex flex-col !mb-16px" size="large">
                             <a-list-item style="background: #fff" class="!p-12px item">
-                                <a-skeleton avatar :title="false" :loading="!!item.loading" active>
+                                <Skeleton avatar :title="false" :loading="!!item.loading" active>
                                     <div class="user">
                                         <div class="link">
                                             <router-link
@@ -63,7 +63,7 @@
                                             }}</a-button
                                         >
                                     </div>
-                                </a-skeleton>
+                                </Skeleton>
                             </a-list-item>
                         </a-badge>
                     </template>
@@ -76,6 +76,7 @@
     import { onMounted, onUnmounted, ref } from 'vue';
     import { PageWrapper } from '@/components/Page';
     import { Time } from '@/components/Time';
+    import { Skeleton } from 'ant-design-vue';
     import { getUserSystemMessage, delectAllUserSystemMessage } from '@/api/notification/index';
     import { useEventListener } from '@/hooks/event/useEventListener';
     import { isFunction } from '@/utils/is';
@@ -83,21 +84,21 @@
     import { postUserFollow } from '@/api/sys/user';
     const data = ref<Array<MessageItem>>([]);
     const loading = ref(false);
-    const page = ref(1);
+    const page = ref(0);
     const next = ref(true);
     const handleFollow = async (type: string, id: string, num: number) => {
         const res = await postUserFollow({ follow: id, type: type });
         data.value[num]['user_interface']['is_follow'] = res.follow_active;
-        console.log(data);
     };
     async function fetchData() {
         loading.value = true;
+        page.value += 1;
         const res: MessageResultModel = await getUserSystemMessage({
             type: 'follow',
             page: page.value,
             pageSize: 20,
         });
-        data.value = res.items;
+        data.value.push(...res.items);
         const ids = [];
         data.value.forEach((item) => {
             if (!item.has_read) {
