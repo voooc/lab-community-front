@@ -28,7 +28,7 @@
                             </div>
                         </div>
                         <div class="content my-25px">
-                            <div class="grid grid-cols-3">
+                            <div class="grid grid-cols-3 gap-5">
                                 <div
                                     v-for="(item, index) in content"
                                     :key="index"
@@ -55,6 +55,33 @@
                             </div>
                         </div>
                     </div>
+                    <div class="target">
+                        <div class="title">
+                            <div style="font-weight: normal; font-size: 36px">实验室环境</div>
+                            <div style="font-size: 18px; color: #999999; text-transform: uppercase">
+                                LAB ENVIROMENT
+                            </div>
+                        </div>
+                        <div class="content my-25px">
+                            <LazyContainer>
+                                <div class="grid w-full h-full grid-cols-3 gap-5">
+                                    <a-image-preview-group>
+                                        <a-image
+                                            v-for="item in imageList"
+                                            :src="item"
+                                            :key="item"
+                                            class="!h-300px"
+                                            style="object-fit: cover"
+                                        />
+                                    </a-image-preview-group>
+                                </div>
+
+                                <template #skeleton>
+                                    <Skeleton :rows="10" />
+                                </template>
+                            </LazyContainer>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,6 +90,12 @@
 <script setup lang="ts">
     import TitleImage from '../layout/index.vue';
     import Icon from '@/components/Icon';
+    import { LazyContainer } from '@/components/Container/index';
+    import { Skeleton } from 'ant-design-vue';
+    import List1 from '@/assets/images/enviroment/1.jpeg';
+    import List2 from '@/assets/images/enviroment/2.jpeg';
+    import List3 from '@/assets/images/enviroment/3.jpg';
+    const imageList = [List1, List2, List3];
     const content = [
         {
             icon: 'carbon:chart-line-data',
@@ -115,7 +148,6 @@
                 .content {
                     .item {
                         box-shadow: 0px 0px 20px #ddd;
-                        width: 386px;
                         transition: all 0.2s linear;
                         -webkit-transition: all 0.2s linear;
 

@@ -28,6 +28,7 @@
     import { reactive, ref } from 'vue';
     import Recommend from '@/views/discussion/recommend.vue';
     import Subscribe from '@/views/discussion/subscribe.vue';
+    import { useRouter } from 'vue-router';
     const editBox = ref();
     const data = reactive({
         //是否正在提交中
@@ -49,15 +50,17 @@
         );
         return res;
     };
+    const router = useRouter();
     async function handleSubmit(imageList, text) {
         data.isSubmitting = true;
         const imgUrlList = await uploadImg(imageList);
-        postDiscussionCreate({
+        const temp = await postDiscussionCreate({
             image: imgUrlList.join(';'),
             content: text,
         });
         data.isSubmitting = false;
         editBox.value.resetAfterSubmit();
+        router.push({ name: 'discussion-item', params: { id: temp.id } });
     }
     const activeKey = ref('recommend');
     const tabs = [

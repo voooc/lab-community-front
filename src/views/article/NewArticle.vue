@@ -21,7 +21,7 @@
                     }"
                     >{{ item.title }}</router-link
                 >
-                <Time :value="item.add_time" />
+                <Time :value="item.add_time" style="font-size: 12px" />
             </div>
         </div>
     </div>
@@ -56,6 +56,8 @@
         margin-top: 5px;
 
         .content {
+            display: flex;
+            flex-direction: column;
             flex: 1;
             padding-left: 10px;
 

@@ -15,7 +15,7 @@
                 </div>
                 <div class="main-container relative">
                     <div class="content middle">
-                        <a-skeleton :loading="data.loading">
+                        <Skeleton :loading="data.loading">
                             <div class="sub-type-box">
                                 <a-menu
                                     v-model:selectedKeys="orderSelectedKeys"
@@ -43,10 +43,10 @@
                             >
                                 <a-empty />
                             </div>
-                        </a-skeleton>
+                        </Skeleton>
                     </div>
                     <div class="sider-right right">
-                        <div class="fixed content" :style="{ top: `${leftTop}` }">
+                        <div class="fixed content" :style="{ top: `calc(20px + ${leftTop})` }">
                             <NewArticle />
                         </div>
                     </div>
@@ -59,6 +59,7 @@
     import List from './list.vue';
     import { onMounted, ref, watch, reactive, onUnmounted, computed } from 'vue';
     import NewArticle from './NewArticle.vue';
+    import { Skeleton } from 'ant-design-vue';
     import { getArticleCategory, getArticleAll } from '@/api/article/index';
     import { useHeaderSecondMenuStoreWithOut } from '@/store/modules/headerMenu';
     import { ArticleResultModel, ArticleItem } from '@/models/article';
@@ -93,13 +94,13 @@
             }, 500);
         });
         promise.then(() => {
-            data.articleInfoList = res.items;
+            data.articleInfoList.push(...res.items);
             data.next = res.next ? true : false;
         });
     };
     const handleOrder: MenuProps['onClick'] = (menuInfo) => {
         orderSelectedKeys.value[0] = menuInfo.key as string;
-        console.log(orderSelectedKeys.value);
+        reset();
         getArticle();
     };
     interface DataModel {
@@ -124,10 +125,21 @@
         end: 10, //滚动过程显示的结束索引
         next: true,
     });
+    function reset() {
+        data.articleInfoList = [];
+        data.page = 1;
+        data.pageSize = 20;
+        data.itemHeight = 139;
+        data.showNum = 10;
+        data.start = 0;
+        data.end = 10;
+        data.next = true;
+    }
     function lasyLoading(e) {
         let scrollTop = e.target.scrollTop || document.body.scrollTop;
         let clientHeight = e.target.clientHeight;
         let scrollHeight = e.target.scrollHeight;
+        // 滚动条距离顶部的距离 + 页面可视窗口的高度 > 网页总高度的时候，此时页面就到了最底部
         if (scrollTop + clientHeight >= scrollHeight) {
             if (data.next) {
                 data.page++;
@@ -155,6 +167,7 @@
     watch(
         () => selectedKeys.value,
         () => {
+            reset();
             getArticle();
         },
         { immediate: true },

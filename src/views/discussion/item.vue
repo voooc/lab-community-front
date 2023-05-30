@@ -105,7 +105,7 @@
                 overflow: hidden;
                 -webkit-line-clamp: 2;
                 max-width: 200px;
-                max-height: 36px;
+                max-height: 40px;
             }
 
             .stat {

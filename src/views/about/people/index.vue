@@ -3,7 +3,7 @@
         <div class="title">团队成员</div>
         <div class="content grid grid-cols-3 gap-5">
             <div v-for="item in data" :key="item.id">
-                <a-card hoverable style="width: 300px">
+                <a-card hoverable style="width: 300px" @click="handleClick(item.id)">
                     <template #cover>
                         <img
                             alt="example"
@@ -22,7 +22,12 @@
     import { getUserAll } from '@/api/sys/user';
     import { UserInfo } from '@/models/user/user';
     import { onMounted, ref } from 'vue';
+    import { useRouter } from 'vue-router';
     const data = ref<Array<UserInfo>>([]);
+    const router = useRouter();
+    function handleClick(id) {
+        router.push({ name: 'user-center', params: { id: id } });
+    }
     onMounted(async () => {
         const res = await getUserAll({});
         data.value = res.items;
