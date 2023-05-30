@@ -95,7 +95,6 @@
                     ? '64px'
                     : '40px';
             secondMenuStore.setMarginTop(temp);
-            console.log(top.value);
         },
         { immediate: true },
     );

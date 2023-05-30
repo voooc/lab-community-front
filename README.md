@@ -20,7 +20,7 @@
 -   获取项目代码
 
 ```bash
-git clone https://github.com/anncwb/vue-vben-admin.git
+git clone https://github.com/voooc/lab-community-front.git
 ```
 
 -   安装依赖
