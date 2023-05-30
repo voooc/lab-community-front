@@ -8,7 +8,8 @@ import { useUserStoreWithOut } from '@/store/modules/user';
 import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
 
 import { RootRoute } from '@/router/routes';
-
+import { createLocalStorage } from '@/utils/cache';
+import { PREROUTE_HISTORY_KEY } from '@/enums/cacheEnum';
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
 const ROOT_PATH = RootRoute.path;
@@ -22,7 +23,6 @@ const whitePathList: string[] = [
     'announcement-detail',
     'about',
     'overview',
-    'enviroment',
     'people',
     'contact',
     'research',
@@ -40,8 +40,12 @@ const whitePathList: string[] = [
 
 export function createPermissionGuard(router: Router) {
     const userStore = useUserStoreWithOut();
+    const ls = createLocalStorage();
     const permissionStore = usePermissionStoreWithOut();
     router.beforeEach(async (to, from, next) => {
+        if (to.path == PageEnum.BASE_LOGIN) {
+            ls.set(PREROUTE_HISTORY_KEY, from.fullPath);
+        }
         if (from.path === ROOT_PATH && to.path === PageEnum.BASE_HOME) {
             next();
             return;

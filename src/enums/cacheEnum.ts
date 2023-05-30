@@ -31,3 +31,5 @@ export enum CacheTypeEnum {
     LOCAL,
 }
 export const ARTICLE_HISTORY_KEY = 'ARTICLE__HISTORY__KEY';
+
+export const PREROUTE_HISTORY_KEY = 'PRE_ROUTER__HISTORY__KEY';

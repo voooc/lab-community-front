@@ -1,5 +1,5 @@
 import { doLogout, getUserInfo, loginApi } from '@/api/sys/user';
-import { TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
+import { PREROUTE_HISTORY_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
 import { PageEnum } from '@/enums/pageEnum';
 import { useMessage } from '@/hooks/web/useMessage';
 import { store } from '@/store';
@@ -12,6 +12,7 @@ import { usePermissionStore } from '@/store/modules/permission';
 import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
 import { getAuthCache, setAuthCache } from '@/utils/auth';
 import { h } from 'vue';
+import { createLocalStorage } from '@/utils/cache';
 interface UserState {
     userInfo: Nullable<UserInfo>;
     token?: string;
@@ -67,12 +68,12 @@ export const useUserStore = defineStore({
                 const data = await loginApi(loginParams);
                 const { token } = data;
                 this.setToken(token);
-                return this.afterLoginAction(true);
+                return this.afterLoginAction();
             } catch (error) {
                 return Promise.reject(error);
             }
         },
-        async afterLoginAction(goHome?: boolean): Promise<UserInfo | null> {
+        async afterLoginAction(): Promise<UserInfo | null> {
             if (!this.getToken) return null;
             // get user info
             const userInfo = await this.getUserInfoAction();
@@ -90,7 +91,13 @@ export const useUserStore = defineStore({
                     permissionStore.setDynamicAddedRoute(true);
                 }
             }
-            goHome && (await router.replace(PageEnum.BASE_HOME));
+            const ls = createLocalStorage();
+            const lastPath = ls.get(PREROUTE_HISTORY_KEY);
+            let path = PageEnum.BASE_HOME;
+            if (lastPath && lastPath !== '/login' && lastPath != '/') {
+                path = lastPath;
+            }
+            await router.replace(path);
             return userInfo;
         },
         async getUserInfoAction(): Promise<UserInfo | null> {

@@ -24,14 +24,6 @@ export const about = [
                 },
             },
             {
-                path: 'enviroment',
-                name: 'enviroment',
-                component: () => import('@/views/about/enviroment/index.vue'),
-                meta: {
-                    title: '实验室环境',
-                },
-            },
-            {
                 path: 'contact',
                 name: 'contact',
                 component: () => import('@/views/about/contact/index.vue'),

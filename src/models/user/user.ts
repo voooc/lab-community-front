@@ -1,3 +1,4 @@
+import { ArticleItem, DiscussionModel } from '../article';
 import { BasicFetchResult } from '../base';
 export interface UserInfo {
     id: string | number;
@@ -49,3 +50,10 @@ export interface MessageItem {
     add_time: string;
 }
 export type MessageResultModel = BasicFetchResult<MessageItem>;
+export interface LikeItem {
+    date: string;
+    id: number | string;
+    item: ArticleItem | DiscussionModel;
+    user: UserInfo;
+}
+export type LikeResultModel = BasicFetchResult<LikeItem>;

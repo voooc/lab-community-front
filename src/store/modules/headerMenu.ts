@@ -54,10 +54,6 @@ export const useHeaderMenuStore = defineStore('HeaderMenu', {
                             titleKey: 'people',
                         },
                         {
-                            title: '实验室环境',
-                            titleKey: 'enviroment',
-                        },
-                        {
                             title: '联系我们',
                             titleKey: 'contact',
                         },
