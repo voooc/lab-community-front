@@ -70,7 +70,6 @@
 
             function getRelativeTime(timeStamp: number) {
                 const currentTime = new Date().getTime();
-
                 // Determine whether the incoming timestamp is earlier than the current timestamp
                 const isBefore = dateUtil(timeStamp).isBefore(currentTime);
 
@@ -98,7 +97,7 @@
                     resStr = Math.floor(diff / ONE_DAY) + t('component.time.days') + dirStr;
                     // More than 29 days, 59 minutes, 59 seconds, less than 364 days, 23 hours, 59 minutes, 59 seconds, and the incoming timestamp is earlier than the current
                 } else if (diff >= 2623860000 && diff <= 31567860000 && isBefore) {
-                    resStr = dateUtil(timeStamp).format('MM-DD-HH-mm');
+                    resStr = dateUtil(timeStamp).format('YYYY-MM-DD HH:mm');
                 } else {
                     resStr = dateUtil(timeStamp).format('YYYY');
                 }

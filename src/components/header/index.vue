@@ -3,7 +3,7 @@
         <div class="logo">
             <img src="@/assets/images/logo.png" class="w-full h-full" />
         </div>
-        <Menu class="!ml-50px flex-1" />
+        <Menu class="!ml-30px flex-1" />
         <div class="ml-auto flex item-center h-full">
             <Search />
             <UserIcon />
@@ -36,8 +36,8 @@
         border-bottom: 1px solid #f1f1f1;
 
         .logo {
-            height: 53px;
-            width: 177px;
+            height: 64px;
+            width: 100px;
             flex-shrink: 0;
         }
     }

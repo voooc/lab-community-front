@@ -5,7 +5,7 @@
                 ref="editorRef"
                 class="!h-full"
                 placeholder="请输入"
-                :editorId="props.editorId"
+                :editorId="editorId"
                 v-model:previewTheme="preview"
                 v-model:code="code"
                 theme="light"
@@ -13,7 +13,7 @@
                 language="zh-CN"
                 v-bind="$attrs"
                 @on-save="onSave"
-                :codeTheme="props.code"
+                :codeTheme="code"
                 @on-upload-img="uploadImg"
                 :toolbars="toolbars"
             >
@@ -42,7 +42,7 @@
     import './index.less';
     import { uploadApi } from '@/api/sys/upload';
     import type { ExposeParam, InsertContentGenerator } from 'md-editor-v3';
-    import { onUnmounted, watch, ref, onMounted, defineExpose, defineProps, computed } from 'vue';
+    import { onUnmounted, watch, ref, onMounted, defineExpose, defineProps } from 'vue';
     import { createLocalStorage } from '@/utils/cache';
     import { MARKDOWN_SAVE_KEY } from '@/enums/cacheEnum';
     MdEditor.config({
@@ -51,19 +51,6 @@
                 instance: highlight,
             },
         },
-    });
-    const emit = defineEmits(['update:content', 'update:preview', 'update:code']);
-    const content = computed({
-        get: () => props.content,
-        set: (val) => emit('update:content', val),
-    });
-    const preview = computed({
-        get: () => props.preview,
-        set: (val) => emit('update:preview', val),
-    });
-    const code = computed({
-        get: () => props.code,
-        set: (val) => emit('update:code', val),
     });
     const ls = createLocalStorage();
     const props = defineProps({
@@ -84,7 +71,30 @@
     const insert = (generator: InsertContentGenerator) => {
         editorRef.value?.insert(generator);
     };
-    // const storagedText = ls.get(MARKDOWN_SAVE_KEY) || '';
+    const content = ref('');
+    const code = ref('');
+    const editorId = ref('');
+    const preview = ref('');
+    watch(
+        () => [props.code, props.content, props.editorId, props.preview],
+        () => {
+            if (props.code) {
+                code.value = props.code;
+            }
+            if (props.content) {
+                content.value = props.content;
+            }
+            if (props.editorId) {
+                editorId.value = props.editorId;
+            }
+            if (props.preview) {
+                preview.value = props.preview;
+            }
+        },
+        {
+            immediate: true,
+        },
+    );
     const onChangeCode = (value) => {
         code.value = value;
     };
@@ -143,7 +153,7 @@
         );
         callback(
             res.map((item: any) => {
-                return item[0];
+                return item;
             }),
         );
     };
